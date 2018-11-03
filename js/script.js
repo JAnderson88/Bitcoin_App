@@ -2,8 +2,8 @@ const displayPrice = document.querySelector(".display_price");
 const newsFeed = document.querySelector(".news_feed");
 const API_KEY = "f3333d196ace41c09c7daf90e5ca10bd";
 
-class PriceDisplay{
-  constructor(country){
+class PriceDisplay {
+  constructor(country) {
     //main container
     const container = document.createElement("div");
     container.classList = "price_container"
@@ -27,7 +27,7 @@ class PriceDisplay{
     const changeLabel = document.createElement("div");
     const change = document.createElement("div");
     changeLabel.textContent = "Change %";
-    change.textContent = (localStorage.getItem(country.code) === null) ? "0.00%" :  ((((country.rate) - (JSON.parse(localStorage.getItem(country.code)).rate))/(JSON.parse(localStorage.getItem(country.code)).rate)) *100).toFixed(2);
+    change.textContent = (localStorage.getItem(country.code) === null) ? "0.00%" : ((((country.rate) - (JSON.parse(localStorage.getItem(country.code)).rate)) / (JSON.parse(localStorage.getItem(country.code)).rate)) * 100).toFixed(2);
     changeContainer.appendChild(changeLabel);
     changeContainer.appendChild(change);
     container.appendChild(changeContainer);
@@ -48,8 +48,8 @@ class PriceDisplay{
   }
 }
 
-class NewsDisplay{
-  constructor(story){
+class NewsDisplay {
+  constructor(story) {
     //main container
     const container = document.createElement("div");
     container.classList = "news_container";
@@ -85,20 +85,20 @@ class NewsDisplay{
     newsFeed.appendChild(container);
   }
 
-  truncateDescription(desc){
-    return (desc.length > 200) ? desc.substring(0, 201)+"..." : desc; 
+  truncateDescription(desc) {
+    return (desc.length > 200) ? desc.substring(0, 201) + "..." : desc;
   }
 }
 
-class Bitcoin{
-  constructor(){
-    this.setDefaultCountries();
+class Bitcoin {
+  constructor() {
+    this.countries = this.setDefaultCountries();
     this.getPrices();
     this.indexes = 6;
     this.getNewsStories();
   }
 
-  getPrices(){
+  getPrices() {
     fetch('https://bitpay.com/api/rates')
       .then(res => res.json())
       .then(data => {
@@ -108,18 +108,18 @@ class Bitcoin{
       });
   }
 
-  setDefaultCountries(){
-    this.countries = [
-      {index: 1, code: "BCH"},
-      {index: 2, code: "USD"},
-      {index: 3, code: "EUR"},
-      {index: 4, code: "GBP"},
-      {index: 5, code: "JPY"},
-      {index: 6, code: "CAD"},
+  setDefaultCountries() {
+    return [
+      { index: 1, code: "BCH" },
+      { index: 2, code: "USD" },
+      { index: 3, code: "EUR" },
+      { index: 4, code: "GBP" },
+      { index: 5, code: "JPY" },
+      { index: 6, code: "CAD" },
     ]
   }
 
-  setPrices(){
+  setPrices() {
     displayPrice.innerHTML = "";
     this.countries.forEach(country => {
       new PriceDisplay(this.prices[country.index]);
@@ -132,48 +132,48 @@ class Bitcoin{
     new_country.textContent = "Add New Country";
     remove_country.textContent = "Remove a Country";
     new_country.addEventListener("click", e => { return this.addCountry(); });
-    remove_country.addEventListener("click", e => { return this.removeCountry();});
+    remove_country.addEventListener("click", e => { return this.removeCountry(); });
     button_container.appendChild(new_country);
     button_container.appendChild(remove_country);
     displayPrice.appendChild(button_container);
   }
 
-  addCountry(){
+  addCountry() {
     const search = window.prompt("Which currency are you looking for? Please use the currency code for the country.");
     this.prices.forEach((country, index) => {
-      if(country.code === search.toUpperCase()){
+      if (country.code === search.toUpperCase()) {
         this.countries.push(
-          {index, code: country.code}
+          { index, code: country.code }
         )
       }
     });
     return this.setPrices();
   }
 
-  removeCountry(){
+  removeCountry() {
     const search = window.prompt("Which currency would you like to remove? Pleas use the currency code for the country.")
     this.countries.forEach((country, index) => {
-      if(country.code === search.toUpperCase()){
-        this.countries = [...this.countries.slice(0, index), ...this.countries.slice(index+1)]
+      if (country.code === search.toUpperCase()) {
+        this.countries = [...this.countries.slice(0, index), ...this.countries.slice(index + 1)]
       }
     });
     return this.setPrices();
   }
 
-  getNewsStories(){
-    const today = `${new Date().getFullYear()}-${(new Date().getMonth)}-${new Date().getDate()}`
-    fetch(`https://newsapi.org/v2/everything?q=bitcoin&from=${today}&sortBy=publishedAt&apiKey=${API_KEY}`)
+  getNewsStories() {
+    const monthAgo = `${new Date().getFullYear()}-${(new Date().getMonth)}-${new Date().getDate()}`
+    fetch(`https://newsapi.org/v2/everything?q=bitcoin&from=${monthAgo}&sortBy=publishedAt&apiKey=${API_KEY}`)
       .then(res => res.json())
       .then(data => {
         this.stories = data.articles;
         this.addNewsStories(this.indexes);
-        
+
       });
   }
 
-  addNewsStories(limit){
-    if(this.indexes === 20) return;
-    for(let i=limit-6; i<limit; i++){
+  addNewsStories(limit) {
+    if (this.indexes === 20) return;
+    for (let i = limit - 6; i < limit; i++) {
       new NewsDisplay(this.stories[i]);
     }
     newsFeed.innerHTML += `
@@ -183,15 +183,15 @@ class Bitcoin{
     `
   }
 
-  incrementIndexes(){
-    this.indexes = (this.indexes >=20) ? 20 : this.indexes + 6;
+  incrementIndexes() {
+    this.indexes = (this.indexes >= 20) ? 20 : this.indexes + 6;
   }
 }
 
 const bitcoin = new Bitcoin();
 
 window.addEventListener("scroll", e => {
-    if(document.body.offsetHeight - window.scrollY <= window.innerHeight){
+  if (document.body.offsetHeight - window.scrollY <= window.innerHeight) {
     bitcoin.incrementIndexes();
     bitcoin.addNewsStories(bitcoin.indexes);
   }
